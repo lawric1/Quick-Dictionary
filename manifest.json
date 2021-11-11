@@ -10,7 +10,7 @@
             "16": "icon.png" 
         }
     },
-    "permissions": ["scripting", "activeTab"], 
+    "permissions": ["activeTab"], 
     "background": {
         "scripts": ["background.js"]
     },
