@@ -8,11 +8,22 @@ chrome.browserAction.onClicked.addListener(function (tab) {
         chrome.tabs.executeScript({file: "script.js"});
 
     }else{
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.executeScript(tabs[0].id, {
+                file: "script.js"
+            }, function(){
+                chrome.tabs.sendMessage(tabs[0].id,{
+                    status: "disabled"
+                });
+            });
+        });
+
         chrome.browserAction.setBadgeText({text: ""})
-        chrome.runtime.reload()
     }
 });
 
 chrome.tabs.onActivated.addListener(() => {
     chrome.runtime.reload()
 });
+
+

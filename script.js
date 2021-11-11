@@ -1,9 +1,3 @@
-let selection = window.getSelection(),
-getRange      = selection.getRangeAt(0),
-selectionRect = getRange.getBoundingClientRect();
-
-top = selectionRect.top;
-left = selectionRect.left;
 
 function getMeanings(data) {
     meanings = data[0].meanings
@@ -31,11 +25,18 @@ function getMeanings(data) {
     return div
 }
 
-function createPopup(data) {
+function createPopup(data, selection) {
+    
+    getRange      = selection.getRangeAt(0),
+    selectionRect = getRange.getBoundingClientRect();
+
+    top = selectionRect.top;
+    left = selectionRect.left;
+
     var popup = document.createElement("div");
     popup.style.cssText = `
     position: absolute;
-    width: 300px;
+    width: auto;
     padding: 16px;
     background: lightblue;
     color: white;
@@ -55,16 +56,32 @@ function createPopup(data) {
     meanings = getMeanings(data)
     popup.appendChild(meanings);
     document.documentElement.appendChild(popup);
+
+    document.body.addEventListener('click', (e) => {
+        popup.remove()
+    }, false);
 }
 
-function getData(word) {
-    var data;
-    fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + word)
-        .then(Response => {return Response.json()})
-        .then(result  => {
-            data = result;
-            createPopup(data);
-        })
+// function removePopup(popup) {
+//     popup.remove()
+//     document.body.removeEventListener('click', removePopup)
+// }
+async function getData(selection) {
+    try {
+        const data = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + selection.toString()).then(Response => {return Response.json()})
+        createPopup(data, selection)
+    } catch(e) {console.log(e)}
 }
 
-getData(selection.toString());
+window.addEventListener('dblclick', e => {
+    let selection = document.getSelection();
+    console.log(selection.toString())
+    getData(selection);
+    
+});
+
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.status) {
+        alert(message.status);
+    }
+});
