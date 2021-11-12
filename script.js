@@ -48,8 +48,6 @@ function createPopup(data) {
     var selection = window.getSelection();
     var selectionRect = selection.getRangeAt(0).getBoundingClientRect()
 
-    alert(selectionRect.top);
-
     var popup           = document.createElement("div");
     popup.style.cssText = `
         position: absolute;
@@ -84,10 +82,6 @@ function createPopup(data) {
     }, false);
 }
 
-// function removePopup(popup) {
-//     popup.remove()
-//     document.body.removeEventListener('click', removePopup)
-// }
 async function getData(word) {
     try {
         const data = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + word).then(Response => {return Response.json()})
@@ -95,14 +89,16 @@ async function getData(word) {
     } catch(e) {console.log(e)}
 }
 
-document.body.addEventListener('dblclick', e => {
+function getDataHandler(event) {
     let word = window.getSelection().toString();
     getData(word);
-    
-});
+}
+
+document.body.addEventListener('dblclick', getDataHandler, true);
 
 chrome.runtime.onMessage.addListener((message) => {
     if (message.status) {
-        alert(message.status);
+        console.log(message.status)
+        document.body.removeEventListener('dblclick', getDataHandler, true);
     }
 });
