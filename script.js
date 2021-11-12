@@ -12,8 +12,27 @@ function getMeanings(data) {
 
         partOfSpeech.innerText = meaning.partOfSpeech;
         definition.innerText = meaning.definitions[0].definition;
-        example.innerText = meaning.definitions[0].example;
+        example.innerText = '"' + meaning.definitions[0].example + '"';
         
+        partOfSpeech.style.cssText = `
+            margin-top: 16px;
+            margin-bottom: 0px;
+            font-size: smaller;
+            font-style: italic;
+            opacity: 0.8;
+        `;
+        definition.style.cssText = `
+            margin-top: 16px;
+            margin-left: 6px;
+        `;
+        example.style.cssText = `
+            display: list-item;
+            list-style-type: square;
+            list-style-position: outside;
+            margin-left: 24px;
+            opacity: 0.7;
+        `;
+
         block.appendChild(partOfSpeech);
         block.appendChild(definition);
         block.appendChild(example);
@@ -25,35 +44,38 @@ function getMeanings(data) {
     return div
 }
 
-function createPopup(data, selection) {
-    
-    getRange      = selection.getRangeAt(0),
-    selectionRect = getRange.getBoundingClientRect();
+function createPopup(data) {
+    var selection = window.getSelection();
+    var selectionRect = selection.getRangeAt(0).getBoundingClientRect()
 
-    top = selectionRect.top;
-    left = selectionRect.left;
+    alert(selectionRect.top);
 
-    var popup = document.createElement("div");
+    var popup           = document.createElement("div");
     popup.style.cssText = `
-    position: absolute;
-    width: auto;
-    padding: 16px;
-    background: lightblue;
-    color: white;
-    border-radius: 8px;
-    z-index: 9999;
+        position: absolute;
+        width: auto;
+        padding: 16px;
+        background: #342b49;
+        color: white;
+        border: solid;
+        border-radius: 8px;
+        z-index: 9999;
 
-    transform: translateX(-50%);
+        transform: translateX(-50%);
     `;
-    popup.style.top = (selectionRect.top + 80) + 'px';
-    popup.style.left = (selectionRect.left + (selectionRect.width * 0.5)) + 'px';
+    popup.style.top     = (selectionRect.top + window.scrollY + 40) + 'px';
+    popup.style.left    = (selectionRect.left + (selectionRect.width * 0.5)) + 'px';
 
-    var word = document.createElement("h3");
-    word.innerText = selection.toString();
-    word.style.margin = '8px';
-    popup.appendChild(word);
+    var word           = document.createElement("h3");
+    word.innerText     = selection.toString();
+    word.style.cssText = `
+        margin: 8px;
+        font-weight: bold;
+    `;
 
     meanings = getMeanings(data)
+
+    popup.appendChild(word);
     popup.appendChild(meanings);
     document.documentElement.appendChild(popup);
 
@@ -66,17 +88,16 @@ function createPopup(data, selection) {
 //     popup.remove()
 //     document.body.removeEventListener('click', removePopup)
 // }
-async function getData(selection) {
+async function getData(word) {
     try {
-        const data = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + selection.toString()).then(Response => {return Response.json()})
-        createPopup(data, selection)
+        const data = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + word).then(Response => {return Response.json()})
+        createPopup(data)
     } catch(e) {console.log(e)}
 }
 
-window.addEventListener('dblclick', e => {
-    let selection = document.getSelection();
-    console.log(selection.toString())
-    getData(selection);
+document.body.addEventListener('dblclick', e => {
+    let word = window.getSelection().toString();
+    getData(word);
     
 });
 
