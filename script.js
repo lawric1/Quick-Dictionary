@@ -45,6 +45,7 @@ function getMeanings(data) {
 }
 
 function createPopup(data) {
+    // Gets selection coordinates to place the popup near it.
     var selection = window.getSelection();
     var selectionRect = selection.getRangeAt(0).getBoundingClientRect()
 
@@ -61,7 +62,7 @@ function createPopup(data) {
 
         transform: translateX(-50%);
     `;
-    popup.style.top     = (selectionRect.top + window.scrollY + 40) + 'px';
+    popup.style.top     = (selectionRect.top + window.scrollY + 40) + 'px'; // Window.scrollY is needed here since selectionRect returns the value in relation to the viewport.
     popup.style.left    = (selectionRect.left + (selectionRect.width * 0.5)) + 'px';
 
     var word           = document.createElement("h3");
@@ -75,7 +76,7 @@ function createPopup(data) {
 
     popup.appendChild(word);
     popup.appendChild(meanings);
-    document.documentElement.appendChild(popup);
+    document.documentElement.appendChild(popup); 
 
     document.body.addEventListener('click', (e) => {
         popup.remove()
@@ -83,6 +84,7 @@ function createPopup(data) {
 }
 
 async function getData(word) {
+    // Fetches data from API.
     try {
         const data = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + word).then(Response => {return Response.json()})
         createPopup(data)

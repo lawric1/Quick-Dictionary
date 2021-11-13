@@ -1,13 +1,14 @@
 var enable = false;
 
 chrome.browserAction.onClicked.addListener(function (tab) {
-    enable = enable ? false : true; //Switch to true or false everytime the extension is clicked
+    enable = enable ? false : true; //Switch to true or false everytime the extension is clicked.
 
     if(enable){
-        chrome.browserAction.setBadgeText({text: "on"})
+        chrome.browserAction.setBadgeText({text: "on", tabId: tab.id})
         chrome.tabs.executeScript({file: "script.js"});
 
     }else{
+        // When extenision is disabled, send message to injected script to remove event listeners.
         chrome.tabs.query({active: true, currentWindow: true}, 
             function(tabs){
                 chrome.tabs.sendMessage(tabs[0].id,{
@@ -16,12 +17,13 @@ chrome.browserAction.onClicked.addListener(function (tab) {
             }
         );
 
-        chrome.browserAction.setBadgeText({text: ""})
+        chrome.browserAction.setBadgeText({text: "", tabId: tab.id})
     }
 });
 
-chrome.tabs.onActivated.addListener(() => {
-    chrome.runtime.reload()
-});
+// Reloads extension when switching pages for quick debug.
+// chrome.tabs.onActivated.addListener(() => {
+//     chrome.runtime.reload()
+// });
 
 
