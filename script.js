@@ -1,10 +1,11 @@
-
 function getMeanings(data) {
     meanings = data[0].meanings
     var div = document.createElement("div");
 
     meanings.forEach(meaning => {
         var block = document.createElement("div");
+        var line = document.createElement('hr');
+        line.style.opacity = "0.7";
 
         var partOfSpeech = document.createElement("p");
         var definition = document.createElement("p");
@@ -33,6 +34,7 @@ function getMeanings(data) {
             opacity: 0.7;
         `;
 
+        block.appendChild(line);
         block.appendChild(partOfSpeech);
         block.appendChild(definition);
         block.appendChild(example);
@@ -45,14 +47,30 @@ function getMeanings(data) {
 }
 
 function createPopup(data) {
-    // Gets selection coordinates to place the popup near it.
     var selection = window.getSelection();
-    var selectionRect = selection.getRangeAt(0).getBoundingClientRect()
+    var selectionRect = selection.getRangeAt(0).getBoundingClientRect();
 
-    var popup           = document.createElement("div");
+    var popup = document.createElement("div");
+    document.documentElement.appendChild(popup); 
+
+    var word           = document.createElement("h3");
+    word.innerText     = selection.toString();
+    word.style.cssText = `
+        margin: 8px;
+        font-weight: bold;
+    `;
+    popup.appendChild(word);
+
+    var meanings = getMeanings(data);
+    popup.appendChild(meanings);
+
+    // Gets word selection coordinates to place the popup near it.
+    var popupTop = (selectionRect.top + window.scrollY + 40);   // Window.scrollY is needed here since selectionRect returns the value in relation to the viewport instead of whole page.
+    var popupLeft = (selectionRect.left + (selectionRect.width/2));
+    
     popup.style.cssText = `
         position: absolute;
-        width: auto;
+        width: 400px;
         padding: 16px;
         background: #342b49;
         color: white;
@@ -62,21 +80,13 @@ function createPopup(data) {
 
         transform: translateX(-50%);
     `;
-    popup.style.top     = (selectionRect.top + window.scrollY + 40) + 'px'; // Window.scrollY is needed here since selectionRect returns the value in relation to the viewport.
-    popup.style.left    = (selectionRect.left + (selectionRect.width * 0.5)) + 'px';
-
-    var word           = document.createElement("h3");
-    word.innerText     = selection.toString();
-    word.style.cssText = `
-        margin: 8px;
-        font-weight: bold;
-    `;
-
-    meanings = getMeanings(data)
-
-    popup.appendChild(word);
-    popup.appendChild(meanings);
-    document.documentElement.appendChild(popup); 
+    popup.style.top     = popupTop + 'px';
+    popup.style.left    = popupLeft + 'px';
+    if (popup.getBoundingClientRect().left < 0) {
+        // This will prevent the popup window from going outside the page.
+        popupLeft += ((popup.offsetWidth/2) - (selectionRect.width/2))
+        popup.style.left = popupLeft + 'px'; 
+    }
 
     document.body.addEventListener('click', (e) => {
         popup.remove()
@@ -100,7 +110,6 @@ document.body.addEventListener('dblclick', getDataHandler, true);
 
 chrome.runtime.onMessage.addListener((message) => {
     if (message.status) {
-        console.log(message.status)
         document.body.removeEventListener('dblclick', getDataHandler, true);
     }
 });

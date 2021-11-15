@@ -9,13 +9,9 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 
     }else{
         // When extenision is disabled, send message to injected script to remove event listeners.
-        chrome.tabs.query({active: true, currentWindow: true}, 
-            function(tabs){
-                chrome.tabs.sendMessage(tabs[0].id,{
-                    status: "disabled"
-                })
-            }
-        );
+        chrome.tabs.sendMessage(tab.id,{
+            status: "disabled"
+        });
 
         chrome.browserAction.setBadgeText({text: "", tabId: tab.id})
     }
@@ -25,5 +21,3 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 // chrome.tabs.onActivated.addListener(() => {
 //     chrome.runtime.reload()
 // });
-
-
